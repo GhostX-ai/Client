@@ -10,15 +10,42 @@ namespace Client
         static int id = 0;
         static void Main(string[] args)
         {
+            TimerCallback timer = new TimerCallback(CheckB);
+            Timer time = new Timer(timer, clients, 0, 1000);
             Thread func = new Thread(Functions);
             func.Start();
         }
+
+        public static void CheckB(object o)
+        {
+            int i = 0;
+            foreach (var x in clients)
+            {
+                if (x.Balance > x.LastBalance)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"{x.Id} {x.Balance} > {x.LastBalance} [+]");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    clients[i].LastBalance = clients[i].Balance;
+                }
+                else if (x.Balance < x.LastBalance)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"{x.Id} {x.Balance} < {x.LastBalance} [-]");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    clients[i].LastBalance = clients[i].Balance;
+                }
+                i++;
+            }
+        }
+
         static void Functions()
         {
             bool start = true;
             while (start)
             {
-                Thread selectAll = new Thread(new ThreadStart(SelectAll));
+                Thread.Sleep(1000);
+                Thread selectAll = new Thread(() => SelectAll(clients));
                 selectAll.Start();
                 Console.WriteLine("1-for select one.\n2-for insert one");
                 int choose = int.Parse(Console.ReadLine());
@@ -40,7 +67,15 @@ namespace Client
                                     break;
                                 case 2:
                                     {
-                                        Thread update = new Thread(new ThreadStart(Update));
+                                        Console.WriteLine("Reenter FirstName:");
+                                        string firstName = Console.ReadLine();
+                                        Console.WriteLine("Reenter LastName:");
+                                        string lastName = Console.ReadLine();
+                                        Console.WriteLine("Reenter Age:");
+                                        int age = int.Parse(Console.ReadLine());
+                                        Console.WriteLine("Reenter Balance:");
+                                        decimal balance = decimal.Parse(Console.ReadLine());
+                                        Thread update = new Thread(() => Update(new Client() { Age = age, Balance = balance, FirstName = firstName, LastName = lastName }));
                                         update.Start();
                                     }
                                     break;
@@ -78,38 +113,30 @@ namespace Client
             clients = li;
         }
 
-        static void SelectAll()
+        static void SelectAll(List<Client> cln)
         {
             Console.WriteLine("Id FirstName LastName Age Balance");
-            foreach (var client in clients)
+            foreach (var client in cln)
             {
                 Console.WriteLine($"{client.Id} {client.FirstName} {client.LastName} {client.Age} {client.Balance}");
             }
         }
-        static void Update()
+        static void Update(Client client)
         {
-            Console.WriteLine("Reenter FirstName:");
-            string firstName = Console.ReadLine();
-            Console.WriteLine("Reenter LastName:");
-            string lastName = Console.ReadLine();
-            Console.WriteLine("Reenter Age:");
-            int age = int.Parse(Console.ReadLine());
-            Console.WriteLine("Reenter Balance:");
-            decimal balance = decimal.Parse(Console.ReadLine());
             int i = 0;
-            foreach (var client in clients)
+            foreach (var clien in clients)
             {
-                if (client.Id == id)
+                if (clien.Id == id)
                 {
                     break;
                 }
                 i++;
             }
-            clients[i].FirstName = firstName;
-            clients[i].LastName = lastName;
+            clients[i].FirstName = client.FirstName;
+            clients[i].LastName = client.LastName;
             clients[i].LastBalance = clients[i].Balance;
-            clients[i].Age = age;
-            clients[i].Balance = balance;
+            clients[i].Age = client.Age;
+            clients[i].Balance = client.Balance;
         }
         static void Insert(Client client)
         {
