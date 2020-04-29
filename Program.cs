@@ -55,6 +55,18 @@ namespace Client
                         {
                             Console.WriteLine("Enter client Id from upper:");
                             id = int.Parse(Console.ReadLine());
+                            bool z = true;
+                            foreach (var x in clients)
+                            {
+                                if (x.Id == id)
+                                {
+                                    z = false;
+                                }
+                            }
+                            if (z)
+                            {
+                                break;
+                            }
                             Console.WriteLine("1-for delete\n2- for update\n3-to go to the main menu");
                             int chs = int.Parse(Console.ReadLine());
                             switch (chs)
