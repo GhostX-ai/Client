@@ -16,12 +16,9 @@ namespace Client
         static void Functions()
         {
             bool start = true;
-            Thread insert = new Thread(Insert);
-            Thread selectAll = new Thread(SelectAll);
-            Thread update = new Thread(Update);
-            Thread delete = new Thread(Delete);
             while (start)
             {
+                Thread selectAll = new Thread(new ThreadStart(SelectAll));
                 selectAll.Start();
                 Console.WriteLine("1-for select one.\n2-for insert one");
                 int choose = int.Parse(Console.ReadLine());
@@ -37,12 +34,14 @@ namespace Client
                             {
                                 case 1:
                                     {
-                                        Delete();
+                                        Thread delete = new Thread(new ThreadStart(Delete));
+                                        delete.Start();
                                     }
                                     break;
                                 case 2:
                                     {
-                                        Update();
+                                        Thread update = new Thread(new ThreadStart(Update));
+                                        update.Start();
                                     }
                                     break;
                             }
@@ -50,7 +49,16 @@ namespace Client
                         break;
                     case 2:
                         {
-                            Insert();
+                            Console.WriteLine("Enter FirstName:");
+                            string firstName = Console.ReadLine();
+                            Console.WriteLine("Enter LastName:");
+                            string lastName = Console.ReadLine();
+                            Console.WriteLine("Enter Age:");
+                            int age = int.Parse(Console.ReadLine());
+                            Console.WriteLine("Enter Balance:");
+                            decimal balance = decimal.Parse(Console.ReadLine());
+                            Thread insert = new Thread(() => Insert(new Client() { Age = age, Balance = balance, FirstName = firstName, LastName = lastName }));
+                            insert.Start();
                         }
                         break;
                 }
@@ -59,7 +67,15 @@ namespace Client
 
         static void Delete()
         {
-
+            List<Client> li = new List<Client>();
+            foreach (var client in clients)
+            {
+                if (client.Id != id)
+                {
+                    li.Add(client);
+                }
+            }
+            clients = li;
         }
 
         static void SelectAll()
@@ -95,25 +111,18 @@ namespace Client
             clients[i].Age = age;
             clients[i].Balance = balance;
         }
-        static void Insert()
+        static void Insert(Client client)
         {
-            Console.WriteLine("Enter FirstName:");
-            string firstName = Console.ReadLine();
-            Console.WriteLine("Enter LastName:");
-            string lastName = Console.ReadLine();
-            Console.WriteLine("Enter Age:");
-            int age = int.Parse(Console.ReadLine());
-            Console.WriteLine("Enter Balance:");
-            decimal balance = decimal.Parse(Console.ReadLine());
+
             int id = CheckId();
             clients.Add(new Client()
             {
                 Id = id,
-                Age = age,
-                Balance = balance,
-                FirstName = firstName,
-                LastName = lastName,
-                LastBalance = balance,
+                Age = client.Age,
+                Balance = client.Balance,
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                LastBalance = client.Balance,
             });
         }
         static int CheckId()
